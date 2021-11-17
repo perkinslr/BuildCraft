@@ -76,6 +76,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 dependencies {
     // Testing
     testCompile "junit:junit:4.12"
+    compile fileTree(include: ['*.jar'], dir: 'libs')
 }
 
 minecraft {
@@ -557,4 +558,6 @@ uploadArchives {
         add project.repositories.mavenLocal()
     }
 }
+
+
 

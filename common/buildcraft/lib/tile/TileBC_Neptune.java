@@ -80,8 +80,47 @@ import buildcraft.lib.net.MessageManager;
 import buildcraft.lib.net.MessageUpdateTile;
 import buildcraft.lib.net.PacketBufferBC;
 import buildcraft.lib.tile.item.ItemHandlerManager;
+import buildcraft.api.mj.IMjReceiver;
+import buildcraft.api.mj.MjAPI;
+import cofh.redstoneflux.api.*;
 
-public abstract class TileBC_Neptune extends TileEntity implements IPayloadReceiver, IAdvDebugTarget, IPlayerOwned {
+public abstract class TileBC_Neptune extends TileEntity implements IPayloadReceiver, IAdvDebugTarget, IPlayerOwned, IEnergyReceiver {
+    protected int maxRF = 10000;
+    public boolean canConnectEnergy(EnumFacing from) {
+	IMjReceiver rec = this.getCapability(MjAPI.CAP_RECEIVER, from);
+	
+	return rec != null;
+    }
+    public int getEnergyStored(EnumFacing from) {
+	IMjReceiver rec = this.getCapability(MjAPI.CAP_RECEIVER, from);
+	if (rec==null) {
+	    return 0;
+	}
+	long wanted = this.maxRF - rec.getPowerRequested() / 100;
+	if (wanted > Integer.MAX_VALUE) {
+	    wanted = Integer.MAX_VALUE - 1;
+	    
+	}
+	return (int) wanted;
+    }
+    public int getMaxEnergyStored(EnumFacing from) {
+	IMjReceiver rec = this.getCapability(MjAPI.CAP_RECEIVER, from);
+	if (rec==null) {
+	    return 0;
+	}
+	return this.maxRF;
+    }
+    public int receiveEnergy(EnumFacing from, int maxReceive, boolean simulate) {
+	IMjReceiver rec = this.getCapability(MjAPI.CAP_RECEIVER, from);
+	if (rec == null) {
+	    return 0;
+	}
+	long tf = rec.receivePower(maxReceive * 100, simulate);
+	if (tf > Integer.MAX_VALUE) {
+	    tf = Integer.MAX_VALUE - 1;
+	}
+	return (int)tf;
+    }
     public static final boolean DEBUG = BCDebugging.shouldDebugLog("lib.tile");
 
     protected static final IdAllocator IDS = new IdAllocator("tile");
